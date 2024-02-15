@@ -18,7 +18,7 @@ class User(models.Model):
 
     login = models.EmailField(_("Login"), max_length=254)
     password = models.CharField(_("Password"), max_length=50)
-    access_type = models.CharField(_("Access"), max_length=30, choices=USER_ROLES)
+    access_type = models.CharField(_("Access"), max_length=30, choices=USER_ROLES, default=USER_ROLES["customer"])
     
 
     class Meta:
