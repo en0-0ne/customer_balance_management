@@ -39,6 +39,21 @@ class AccountListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         return Account.objects.all()
+
+class AccountCreateAPIView(generics.CreateAPIView):
+    serializer_class = AccountSerializer
+
+    def get_queryset(self):
+        return Account.objects.all()
+    
+class AccountDetailAPIView(generics.GenericAPIView):
+    serializer_class = AccountSerializer
+    
+    def get(self, request, id):
+        query_set = Account.objects.filter(id=id).first()
+        if query_set:
+            return response.Response(self.serializer_class(query_set).data)
+        return response.Response('Not found', status=status.HTTP_404_NOT_FOUND)
     
 
 # ====================================================================
@@ -49,3 +64,18 @@ class AuditListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         return Audit.objects.all()
+
+class AuditCreateAPIView(generics.CreateAPIView):
+    serializer_class = AuditSerializer
+
+    def get_queryset(self):
+        return Audit.objects.all()
+    
+class AuditDetailAPIView(generics.GenericAPIView):
+    serializer_class = AuditSerializer
+    
+    def get(self, request, id):
+        query_set = Audit.objects.filter(id=id).first()
+        if query_set:
+            return response.Response(self.serializer_class(query_set).data)
+        return response.Response('Not found', status=status.HTTP_404_NOT_FOUND)

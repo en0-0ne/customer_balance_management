@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from datetime import datetime
 
 # Create your models here.
 class User(models.Model):
@@ -11,7 +12,6 @@ class User(models.Model):
     }
 
     name = models.CharField(_("Name"), max_length=200)
-    slug = models.SlugField(_("Slug"), null=True, blank=True)
     address = models.TextField(_("Address"))
     email = models.EmailField(_("Email"), max_length=100)
     phone = models.CharField(_("Phone"), max_length=50)
@@ -35,9 +35,8 @@ class User(models.Model):
 
 class Account(models.Model):
 
-    account_no = models.CharField(_("Account No"), max_length=50)
+    account_no = models.CharField(_("Account No"), max_length=50, null=True,blank=True)
     name = models.CharField(_("Name"), max_length=100)
-    slug = models.SlugField(_("Slug"))
     balance = models.FloatField(_("Balance"))
 
     customer_id = models.ForeignKey("account_audit.User", verbose_name=_("Customer"), on_delete=models.DO_NOTHING)
@@ -51,9 +50,6 @@ class Account(models.Model):
     def __str__(self):
         return f'{self.account_no} {self.name}'
 
-    # def get_absolute_url(self):
-    #     return reverse("Account_detail", kwargs={"pk": self.pk})
-
 
 class Audit(models.Model):
     STATES = {
@@ -62,17 +58,23 @@ class Audit(models.Model):
         "cancel": "Cancel",
     }
 
+    ACTIONS = {
+        "INS": "Insert",
+        "UPD": "Update",
+        "DEL": "Delete",
+    }
+
     reference = models.CharField(_("Reference"), max_length=50, unique=True)
     description = models.TextField(_("Description"))
     old_balance = models.FloatField(_("Old balance"))
     new_balance = models.FloatField(_("New balance"))
-    state = models.CharField(_("State"), max_length=20, choices=STATES)
+    state = models.CharField(_("State"), max_length=20, choices=STATES, default=STATES["draft"])
 
     account_ids = models.ManyToManyField("account_audit.Account", verbose_name=_("Accounts"))
     user_id = models.ForeignKey("account_audit.User", verbose_name=_("User"), on_delete=models.DO_NOTHING)
     customer_id = models.SmallIntegerField(_("Customer ID"))
 
-    action = models.CharField(_("Action"), max_length=15)
+    action = models.CharField(_("Action"), max_length=15, choices=ACTIONS)
     write_date = models.DateTimeField(_("Write date"), auto_now=True)
     write_id = models.SmallIntegerField(_("Write ID"))
 
