@@ -1,81 +1,47 @@
 from django.shortcuts import render
 from rest_framework import generics, response, status
-from .models import User, Account, Audit
-from .serializers import UserSerializer, AccountSerializer, AuditSerializer
-
+from .models import Account, Audit, UserProfile
+from .serializers import GroupSerializer, UserSerializer, UserProfileSerializer, AccountSerializer, AuditSerializer
+from django.contrib.auth.models import Group, User
+from rest_framework import permissions, viewsets
 
 
 # ====================================================================
-# |                         USER                                     |
+# |                            USER                                  |
 # ====================================================================
-class UserListAPIView(generics.ListAPIView):
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        return User.objects.all()
-    
-class UserCreateAPIView(generics.CreateAPIView):
-    serializer_class = UserSerializer
+class UserProfileViewSet(viewsets.ModelViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        return User.objects.all()
-    
-class UserDetailAPIView(generics.GenericAPIView):
-    serializer_class = UserSerializer
-    
-    def get(self, request, id):
-        query_set = User.objects.filter(id=id).first()
-        if query_set:
-            return response.Response(self.serializer_class(query_set).data)
-        return response.Response('Not found', status=status.HTTP_404_NOT_FOUND)
-
-    
 
 # ====================================================================
-# |                         ACCOUNT                                  |
+# |                           GROUP                                  |
 # ====================================================================
-class AccountListAPIView(generics.ListAPIView):
+class GroupViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+# ====================================================================
+# |                           ACCOUNT                                |
+# ====================================================================
+class AccountViewSet(viewsets.ModelViewSet):
+    queryset = Account.objects.all()
     serializer_class = AccountSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        return Account.objects.all()
-
-class AccountCreateAPIView(generics.CreateAPIView):
-    serializer_class = AccountSerializer
-
-    def get_queryset(self):
-        return Account.objects.all()
-    
-class AccountDetailAPIView(generics.GenericAPIView):
-    serializer_class = AccountSerializer
-    
-    def get(self, request, id):
-        query_set = Account.objects.filter(id=id).first()
-        if query_set:
-            return response.Response(self.serializer_class(query_set).data)
-        return response.Response('Not found', status=status.HTTP_404_NOT_FOUND)
-    
 
 # ====================================================================
-# |                         AUDIT                                    |
+# |                           AUDIT                                  |
 # ====================================================================
-class AuditListAPIView(generics.ListAPIView):
+class AuditViewSet(viewsets.ModelViewSet):
+    queryset = Audit.objects.all()
     serializer_class = AuditSerializer
-
-    def get_queryset(self):
-        return Audit.objects.all()
-
-class AuditCreateAPIView(generics.CreateAPIView):
-    serializer_class = AuditSerializer
-
-    def get_queryset(self):
-        return Audit.objects.all()
-    
-class AuditDetailAPIView(generics.GenericAPIView):
-    serializer_class = AuditSerializer
-    
-    def get(self, request, id):
-        query_set = Audit.objects.filter(id=id).first()
-        if query_set:
-            return response.Response(self.serializer_class(query_set).data)
-        return response.Response('Not found', status=status.HTTP_404_NOT_FOUND)
+    permission_classes = [permissions.IsAuthenticated]

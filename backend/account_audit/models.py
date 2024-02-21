@@ -1,45 +1,28 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from datetime import datetime
+from django.contrib.auth.models import User
 
-# Create your models here.
-class User(models.Model):
 
-    USER_ROLES = {
-        "user": "User",
-        "customer": "Customer",
-    }
-
-    name = models.CharField(_("Name"), max_length=200)
-    address = models.TextField(_("Address"))
-    email = models.EmailField(_("Email"), max_length=100)
-    phone = models.CharField(_("Phone"), max_length=50)
-
-    login = models.EmailField(_("Login"), max_length=254)
-    password = models.CharField(_("Password"), max_length=50)
-    access_type = models.CharField(_("Access"), max_length=30, choices=USER_ROLES, default=USER_ROLES["customer"])
-    
-
-    class Meta:
-        db_table = 'user'
-        verbose_name = _("User")
-        verbose_name_plural = _("Users")
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name
-
-    # def get_absolute_url(self):
-    #     return reverse("_detail", kwargs={"pk": self.pk})
-
+        return f'[{self.user.id}] {self.user.username}'
 
 class Account(models.Model):
 
-    account_no = models.CharField(_("Account No"), max_length=50, null=True,blank=True)
+    account_no = models.CharField(_("Account No"), max_length=50, null=True, blank=True)
     name = models.CharField(_("Name"), max_length=100)
     balance = models.FloatField(_("Balance"))
 
-    customer_id = models.ForeignKey("account_audit.User", verbose_name=_("Customer"), on_delete=models.DO_NOTHING)
+    # user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    profile = models.ForeignKey(
+        "account_audit.UserProfile",
+        verbose_name=_("Profile"),
+        on_delete=models.DO_NOTHING,
+        null=True
+    )
 
     class Meta:
         db_table = 'account'
@@ -49,6 +32,7 @@ class Account(models.Model):
 
     def __str__(self):
         return f'{self.account_no} {self.name}'
+
 
 
 class Audit(models.Model):
@@ -71,7 +55,13 @@ class Audit(models.Model):
     state = models.CharField(_("State"), max_length=20, choices=STATES, default=STATES["draft"])
 
     account_ids = models.ManyToManyField("account_audit.Account", verbose_name=_("Accounts"))
-    user_id = models.ForeignKey("account_audit.User", verbose_name=_("User"), on_delete=models.DO_NOTHING)
+    # user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    profile = models.ForeignKey(
+        "account_audit.UserProfile",
+        verbose_name=_("Profile"),
+        on_delete=models.DO_NOTHING,
+        null=True
+    )
     customer_id = models.SmallIntegerField(_("Customer ID"))
 
     action = models.CharField(_("Action"), max_length=15, choices=ACTIONS)
